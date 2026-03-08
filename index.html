@@ -733,6 +733,19 @@ function updateWpBar() {
 let _wpArticles = [];
 let _wpArticlesFiltered = [];
 
+async function wpApiFetch(endpoint) {
+  const wpUrl = getWpUrl();
+  // Try direct fetch first, fall back to proxy if CORS blocks
+  try {
+    const r = await fetch(`${wpUrl}${endpoint}`);
+    if (r.ok) return r;
+    throw new Error('not ok');
+  } catch(e) {
+    // CORS blocked or error — use Vercel proxy
+    return fetch(`/api/wp-proxy?wpUrl=${encodeURIComponent(wpUrl)}&endpoint=${encodeURIComponent(endpoint)}`);
+  }
+}
+
 async function loadWpArticles() {
   const url = getWpUrl();
   if (!url) return;
@@ -746,7 +759,7 @@ async function loadWpArticles() {
     let page = 1;
     let hasMore = true;
     while (hasMore && page <= 10) {
-      const r = await fetch(`${url}/wp-json/wp/v2/posts?per_page=100&page=${page}&_embed&_fields=id,title,excerpt,date,link,_embedded`);
+      const r = await wpApiFetch(`/wp-json/wp/v2/posts?per_page=100&page=${page}&_embed&_fields=id,title,excerpt,date,link,_embedded`);
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const posts = await r.json();
       const totalPages = parseInt(r.headers.get('X-WP-TotalPages') || '1');
@@ -801,7 +814,7 @@ async function selectWpArticle(id) {
   const statusEl = document.getElementById('wp-articles-status');
   statusEl.textContent = 'Chargement du contenu…';
   try {
-    const r = await fetch(`${url}/wp-json/wp/v2/posts/${id}?_fields=content`);
+    const r = await wpApiFetch(`/wp-json/wp/v2/posts/${id}?_fields=content`);
     const data = await r.json();
     const content = (data.content?.rendered || '').replace(/<[^>]+>/g, ' ').replace(/\s{3,}/g, '\n').trim();
     const article = _wpArticles.find(a => a.id === id);
