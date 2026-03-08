@@ -311,6 +311,36 @@ textarea { min-height:80px; }
 .kb-search-toggle input { flex-shrink:0;margin-top:2px; }
 .kb-search-toggle.active { border-color:var(--accent);background:rgba(99,102,241,0.04); }
 .kb-fetching { font-size:11px;color:var(--text-muted);font-style:italic;margin-top:6px; }
+
+/* WORDPRESS ARTICLE LIST */
+.wp-articles-list { max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px; }
+.wp-article-item { display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;transition:all 0.15s;user-select:none; }
+.wp-article-item:hover { border-color:var(--accent); }
+.wp-article-item.selected { border-color:var(--accent); }
+.theme-diploma .wp-article-item.selected { background:rgba(15,28,58,0.04); }
+.theme-benjamin .wp-article-item.selected { background:rgba(109,40,217,0.05); }
+.theme-marketing .wp-article-item.selected { background:rgba(8,145,178,0.06); }
+.wp-article-check { width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent;transition:all 0.15s;margin-top:2px; }
+.wp-article-item.selected .wp-article-check { background:var(--accent);border-color:var(--accent);color:#fff; }
+.wp-article-body { flex:1;min-width:0; }
+.wp-article-title { font-size:13.5px;font-weight:600;color:var(--text);line-height:1.4;margin-bottom:3px; }
+.wp-article-meta { font-size:11px;color:var(--text-dim); }
+.wp-article-cat { display:inline-block;font-size:10px;padding:2px 7px;border-radius:100px;border:1px solid var(--border);color:var(--text-muted);margin-right:4px;font-weight:500; }
+.wp-search-bar { display:flex;gap:8px;margin-bottom:12px; }
+.wp-search-bar input { flex:1; }
+
+/* LINKEDIN PUBLISH */
+.li-publish-section { margin-top:14px;padding:14px;border-radius:var(--radius);border:1px solid rgba(0,119,181,0.2);background:rgba(0,119,181,0.04);display:flex;flex-direction:column;gap:8px; }
+.li-publish-label { font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#0077b5;opacity:0.7; }
+.btn-li { padding:8px 18px;border-radius:100px;border:1px solid #0077b5;background:rgba(0,119,181,0.1);color:#0077b5;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:inherit; }
+.btn-li:hover:not(:disabled) { background:#0077b5;color:#fff; }
+.btn-li:disabled { opacity:0.6;cursor:default; }
+.btn-li.li-success { border-color:#22c55e;background:rgba(34,197,94,0.1);color:#22c55e; }
+.li-status { font-size:12px;color:var(--text-dim);min-height:14px; }
+
+/* SCHEDULE */
+.schedule-row { display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px; }
+.schedule-row input[type=datetime-local] { padding:8px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:12px;font-family:inherit; }
 </style>
 </head>
 <body>
@@ -326,6 +356,22 @@ textarea { min-height:80px; }
     <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#555;flex-shrink:0;">API KEY</span>
     <input type="password" id="api-key-input" placeholder="sk-ant-api03-…" oninput="onApiKeyChange(this.value)" style="flex:1;background:transparent;border:none;outline:none;font-family:'DM Mono',monospace;font-size:12px;color:#ccc;padding:0;" autocomplete="off" spellcheck="false" />
     <span id="api-key-status" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
+  </div>
+
+  <!-- WORDPRESS URL BAR -->
+  <div id="wp-url-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 18px;border-radius:100px;max-width:520px;width:100%;transition:all 0.2s;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);">
+    <span id="wp-url-dot" style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#888;"></span>
+    <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#555;flex-shrink:0;">WP</span>
+    <input type="text" id="wp-url-input" placeholder="https://votre-site-wordpress.com (optionnel)" oninput="onWpUrlChange(this.value)" style="flex:1;background:transparent;border:none;outline:none;font-family:'DM Mono',monospace;font-size:12px;color:#ccc;padding:0;" autocomplete="off" spellcheck="false" />
+    <span id="wp-url-status" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
+  </div>
+
+  <!-- LINKEDIN TOKEN BAR -->
+  <div id="li-token-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:32px;padding:10px 18px;border-radius:100px;max-width:520px;width:100%;transition:all 0.2s;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);">
+    <span id="li-token-dot" style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#888;"></span>
+    <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#555;flex-shrink:0;">LINKEDIN</span>
+    <input type="password" id="li-token-input" placeholder="Access token LinkedIn (optionnel)" oninput="onLiTokenChange(this.value)" style="flex:1;background:transparent;border:none;outline:none;font-family:'DM Mono',monospace;font-size:12px;color:#ccc;padding:0;" autocomplete="off" spellcheck="false" />
+    <span id="li-token-status" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
   </div>
 
   <div class="profile-grid">
@@ -395,9 +441,10 @@ textarea { min-height:80px; }
 
         <div class="card">
           <div class="card-title">Source du contenu</div>
-          <div class="source-toggle">
+          <div class="source-toggle" style="grid-template-columns:1fr 1fr 1fr;">
             <button class="source-btn selected" id="btn-source-brief" onclick="selectSource('brief')">📝 Brief libre<small>Décris ce que tu veux publier</small></button>
-            <button class="source-btn" id="btn-source-article" onclick="selectSource('article')">📰 Article / contenu existant<small>Colle un article à transformer</small></button>
+            <button class="source-btn" id="btn-source-article" onclick="selectSource('article')">📰 Coller un texte<small>Article ou contenu à transformer</small></button>
+            <button class="source-btn" id="btn-source-wp" onclick="selectSource('wordpress')">🌐 WordPress<small>Choisir un article publié</small></button>
           </div>
         </div>
 
@@ -422,6 +469,22 @@ textarea { min-height:80px; }
           <div class="f-group">
             <label class="f-label">Colle ici le contenu de l'article ou du texte à transformer *</label>
             <textarea id="article-input" rows="8" placeholder="Colle ici un article de blog, un texte de page web, un communiqué… Le système va extraire les idées clés et les reformuler en post LinkedIn."></textarea>
+          </div>
+        </div>
+
+        <!-- WORDPRESS SOURCE -->
+        <div class="card" id="source-wp-card" style="display:none;">
+          <div class="card-title">Articles WordPress</div>
+          <div id="wp-not-connected" style="font-size:13px;color:var(--text-dim);padding:20px;text-align:center;">
+            ⚠️ Configure l'URL de ton site WordPress sur l'écran d'accueil pour accéder à tes articles.
+          </div>
+          <div id="wp-connected" style="display:none;">
+            <div class="wp-search-bar">
+              <input type="text" id="wp-search-input" placeholder="Rechercher un article…" oninput="filterWpArticles(this.value)" />
+              <button class="btn btn-sec" onclick="loadWpArticles()" style="padding:8px 14px;font-size:12px;flex-shrink:0;">🔄 Actualiser</button>
+            </div>
+            <div id="wp-articles-status" class="kb-fetching"></div>
+            <div class="wp-articles-list" id="wp-articles-list"></div>
           </div>
         </div>
 
@@ -521,6 +584,20 @@ textarea { min-height:80px; }
           <div id="visual-suggestions"></div>
         </div>
 
+        <!-- LinkedIn Publish -->
+        <div class="li-publish-section" id="li-publish-section" style="display:none;">
+          <div class="li-publish-label">in LinkedIn</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn-li" id="btn-li-publish" onclick="publishToLinkedIn()">Publier sur LinkedIn</button>
+            <button class="btn-li" id="btn-li-schedule" onclick="toggleSchedule()" style="background:transparent;">📅 Programmer</button>
+          </div>
+          <div class="schedule-row" id="schedule-row" style="display:none;">
+            <input type="datetime-local" id="schedule-datetime" />
+            <span style="font-size:11px;color:var(--text-muted);">Publication programmée via l'API</span>
+          </div>
+          <div class="li-status" id="li-publish-status"></div>
+        </div>
+
         <!-- Modification -->
         <div class="card modif-card">
           <div class="card-title">💬 Demander une modification</div>
@@ -547,6 +624,15 @@ textarea { min-height:80px; }
           <div class="export-card" onclick="exportCopyCurrent()"><div class="export-icon">📝</div><div class="export-title">Copier le post actuel</div><div class="export-desc">Seulement la variante affichée</div></div>
           <div class="export-card" onclick="exportTxt()"><div class="export-icon">📄</div><div class="export-title">Fichier .txt</div><div class="export-desc">Télécharger toutes les variantes</div></div>
           <div class="export-card" onclick="exportCsv()"><div class="export-icon">📊</div><div class="export-title">Fichier .csv</div><div class="export-desc">Import dans outil de planification</div></div>
+        </div>
+        <!-- LinkedIn Publish from Export -->
+        <div class="li-publish-section" id="li-export-section" style="display:none;">
+          <div class="li-publish-label">in Publier sur LinkedIn</div>
+          <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">Publie directement le post sélectionné sur ton profil LinkedIn.</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button class="btn-li" id="btn-li-export-publish" onclick="publishToLinkedIn()">Publier maintenant</button>
+          </div>
+          <div class="li-status" id="li-export-status"></div>
         </div>
         <div class="card">
           <div class="card-title">🔗 Communication inter-outils</div>
@@ -620,6 +706,190 @@ function updateApiKeyBar() {
   bar.style.background = ok ? 'rgba(34,197,94,0.05)' : 'rgba(255,255,255,0.04)';
   status.textContent = ok ? '✓ Connecté' : 'Clé requise';
   status.style.color = ok ? '#22c55e' : '#ef4444';
+}
+
+// ── WORDPRESS ────────────────────────────────────────────────────────
+function getWpUrl() { return localStorage.getItem('linkedin_wp_url') || ''; }
+function setWpUrl(u) { localStorage.setItem('linkedin_wp_url', u); }
+function onWpUrlChange(val) {
+  const url = val.trim().replace(/\/+$/, '');
+  setWpUrl(url);
+  updateWpBar();
+}
+function updateWpBar() {
+  const url = getWpUrl();
+  const dot = document.getElementById('wp-url-dot');
+  const status = document.getElementById('wp-url-status');
+  const bar = document.getElementById('wp-url-bar');
+  if (!bar) return;
+  const ok = url.startsWith('http');
+  dot.style.background = ok ? '#22c55e' : '#888';
+  bar.style.borderColor = ok ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)';
+  bar.style.background = ok ? 'rgba(34,197,94,0.05)' : 'rgba(255,255,255,0.04)';
+  status.textContent = ok ? '✓ Configuré' : '';
+  status.style.color = ok ? '#22c55e' : '#888';
+}
+
+let _wpArticles = [];
+let _wpArticlesFiltered = [];
+
+async function loadWpArticles() {
+  const url = getWpUrl();
+  if (!url) return;
+  const listEl = document.getElementById('wp-articles-list');
+  const statusEl = document.getElementById('wp-articles-status');
+  statusEl.textContent = 'Chargement des articles…';
+  listEl.innerHTML = '';
+  _wpArticles = [];
+  try {
+    let allPosts = [];
+    let page = 1;
+    let hasMore = true;
+    while (hasMore && page <= 10) {
+      const r = await fetch(`${url}/wp-json/wp/v2/posts?per_page=100&page=${page}&_embed&_fields=id,title,excerpt,date,link,_embedded`);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const posts = await r.json();
+      const totalPages = parseInt(r.headers.get('X-WP-TotalPages') || '1');
+      allPosts = allPosts.concat(posts);
+      hasMore = page < totalPages;
+      page++;
+    }
+    _wpArticles = allPosts.map(p => ({
+      id: p.id,
+      title: p.title?.rendered || '',
+      excerpt: (p.excerpt?.rendered || '').replace(/<[^>]+>/g, '').trim(),
+      date: p.date ? new Date(p.date).toLocaleDateString('fr-FR') : '',
+      link: p.link || '',
+      categories: (p._embedded?.['wp:term']?.[0] || []).map(c => c.name),
+      content: '' // loaded on demand
+    }));
+    _wpArticlesFiltered = _wpArticles;
+    statusEl.textContent = `✓ ${_wpArticles.length} article(s) chargé(s)`;
+    renderWpArticles();
+  } catch(e) {
+    statusEl.textContent = `❌ Erreur : ${e.message}. Vérifie que l'URL est correcte et que le CORS est activé.`;
+  }
+}
+
+function filterWpArticles(q) {
+  const query = q.toLowerCase();
+  _wpArticlesFiltered = query ? _wpArticles.filter(a => a.title.toLowerCase().includes(query) || a.excerpt.toLowerCase().includes(query)) : _wpArticles;
+  renderWpArticles();
+}
+
+function renderWpArticles() {
+  const listEl = document.getElementById('wp-articles-list');
+  listEl.innerHTML = _wpArticlesFiltered.map(a => `
+    <div class="wp-article-item${ST.wpSelectedId === a.id ? ' selected' : ''}" onclick="selectWpArticle(${a.id})">
+      <div class="wp-article-check">✓</div>
+      <div class="wp-article-body">
+        <div class="wp-article-title">${a.title}</div>
+        <div class="wp-article-meta">
+          ${a.categories.map(c => `<span class="wp-article-cat">${c}</span>`).join('')}
+          <span>${a.date}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+async function selectWpArticle(id) {
+  if (ST.wpSelectedId === id) { ST.wpSelectedId = null; renderWpArticles(); return; }
+  ST.wpSelectedId = id;
+  renderWpArticles();
+  // Load full content
+  const url = getWpUrl();
+  const statusEl = document.getElementById('wp-articles-status');
+  statusEl.textContent = 'Chargement du contenu…';
+  try {
+    const r = await fetch(`${url}/wp-json/wp/v2/posts/${id}?_fields=content`);
+    const data = await r.json();
+    const content = (data.content?.rendered || '').replace(/<[^>]+>/g, ' ').replace(/\s{3,}/g, '\n').trim();
+    const article = _wpArticles.find(a => a.id === id);
+    if (article) article.content = content;
+    ST.article = content;
+    statusEl.textContent = `✓ Article chargé (${content.split(/\s+/).length} mots)`;
+  } catch(e) {
+    statusEl.textContent = `❌ Erreur chargement : ${e.message}`;
+  }
+}
+
+// ── LINKEDIN ─────────────────────────────────────────────────────────
+function getLiToken() { return localStorage.getItem('linkedin_li_token') || ''; }
+function setLiToken(t) { localStorage.setItem('linkedin_li_token', t); }
+function getLiPersonId() { return localStorage.getItem('linkedin_li_person_id') || ''; }
+function setLiPersonId(id) { localStorage.setItem('linkedin_li_person_id', id); }
+
+function onLiTokenChange(val) {
+  setLiToken(val.trim());
+  updateLiBar();
+}
+function updateLiBar() {
+  const token = getLiToken();
+  const dot = document.getElementById('li-token-dot');
+  const status = document.getElementById('li-token-status');
+  const bar = document.getElementById('li-token-bar');
+  if (!bar) return;
+  const ok = token.length > 10;
+  dot.style.background = ok ? '#22c55e' : '#888';
+  bar.style.borderColor = ok ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)';
+  bar.style.background = ok ? 'rgba(34,197,94,0.05)' : 'rgba(255,255,255,0.04)';
+  status.textContent = ok ? '✓ Token OK' : '';
+  status.style.color = ok ? '#22c55e' : '#888';
+}
+
+function updateLiPublishVisibility() {
+  const hasToken = getLiToken().length > 10;
+  const sect = document.getElementById('li-publish-section');
+  const exportSect = document.getElementById('li-export-section');
+  if (sect) sect.style.display = hasToken ? '' : 'none';
+  if (exportSect) exportSect.style.display = hasToken ? '' : 'none';
+}
+
+function toggleSchedule() {
+  const row = document.getElementById('schedule-row');
+  row.style.display = row.style.display === 'none' ? '' : 'none';
+}
+
+async function publishToLinkedIn() {
+  const token = getLiToken();
+  if (!token) { alert('⚠️ Configure ton token LinkedIn sur l\'écran d\'accueil.'); return; }
+  const post = ST.posts[ST.currentVariant];
+  if (!post) return;
+
+  const btn = document.getElementById('btn-li-publish');
+  const statusEl = document.getElementById('li-publish-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Publication…';
+  statusEl.textContent = '';
+
+  const fullText = post.hook + '\n\n' + post.body + '\n\n' + (post.hashtags || '');
+
+  try {
+    const res = await fetch('/api/linkedin-publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token,
+        text: fullText,
+        personId: getLiPersonId()
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    if (data.personId) setLiPersonId(data.personId);
+
+    btn.textContent = '✅ Publié !';
+    btn.classList.add('li-success');
+    statusEl.innerHTML = data.postUrl
+      ? `<a href="${data.postUrl}" target="_blank" rel="noopener" style="color:#0077b5;text-decoration:underline;">Voir le post sur LinkedIn →</a>`
+      : '✅ Post publié avec succès !';
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Publier sur LinkedIn';
+    statusEl.textContent = `❌ ${err.message}`;
+    statusEl.style.color = '#ef4444';
+  }
 }
 
 // ── PROFILES ─────────────────────────────────────────────────────────
@@ -740,6 +1010,7 @@ const ST = {
   source: 'brief',
   brief: '',
   article: '',
+  wpSelectedId: null,
   selectedAngle: null,
   proposedAngles: [],
   posts: [],       // [{hook, body, hashtags, visual, score}] — index 0 = principal, 1-3 = variantes
@@ -795,9 +1066,17 @@ function selectSource(type) {
   ST.source = type;
   document.getElementById('btn-source-brief').classList.toggle('selected', type === 'brief');
   document.getElementById('btn-source-article').classList.toggle('selected', type === 'article');
+  document.getElementById('btn-source-wp').classList.toggle('selected', type === 'wordpress');
   document.getElementById('source-brief-card').style.display = type === 'brief' ? '' : 'none';
   document.getElementById('source-article-card').style.display = type === 'article' ? '' : 'none';
-  document.getElementById('sb-source').textContent = type === 'brief' ? 'Brief' : 'Article';
+  document.getElementById('source-wp-card').style.display = type === 'wordpress' ? '' : 'none';
+  document.getElementById('sb-source').textContent = type === 'brief' ? 'Brief' : type === 'wordpress' ? 'WordPress' : 'Article';
+  if (type === 'wordpress') {
+    const wpUrl = getWpUrl();
+    document.getElementById('wp-not-connected').style.display = wpUrl ? 'none' : '';
+    document.getElementById('wp-connected').style.display = wpUrl ? '' : 'none';
+    if (wpUrl && _wpArticles.length === 0) loadWpArticles();
+  }
 }
 
 // ── KB ───────────────────────────────────────────────────────────────
@@ -907,12 +1186,14 @@ async function proposeAngles() {
   if (ST.source === 'brief') {
     ST.brief = document.getElementById('brief-input').value.trim();
     if (!ST.brief) { document.getElementById('brief-input').focus(); return; }
-  } else {
+  } else if (ST.source === 'article') {
     ST.article = document.getElementById('article-input').value.trim();
     if (!ST.article) { document.getElementById('article-input').focus(); return; }
+  } else if (ST.source === 'wordpress') {
+    if (!ST.wpSelectedId || !ST.article) { alert('⚠️ Sélectionne un article WordPress.'); return; }
   }
 
-  document.getElementById('sb-source').textContent = ST.source === 'brief' ? 'Brief' : 'Article';
+  document.getElementById('sb-source').textContent = ST.source === 'brief' ? 'Brief' : ST.source === 'wordpress' ? 'WordPress' : 'Article';
 
   switchStep(1);
   document.getElementById('angles-loading').style.display = 'block';
@@ -920,7 +1201,8 @@ async function proposeAngles() {
   document.getElementById('angles-footer').style.display = 'none';
 
   const p = PROFILES[ST.profile];
-  const sourceContent = ST.source === 'brief' ? `BRIEF : ${ST.brief}` : `ARTICLE À TRANSFORMER :\n${ST.article.substring(0, 3000)}`;
+  const wpTitle = ST.source === 'wordpress' ? (_wpArticles.find(a => a.id === ST.wpSelectedId)?.title || '') : '';
+  const sourceContent = ST.source === 'brief' ? `BRIEF : ${ST.brief}` : ST.source === 'wordpress' ? `ARTICLE WORDPRESS "${wpTitle}" :\n${ST.article.substring(0, 3000)}` : `ARTICLE À TRANSFORMER :\n${ST.article.substring(0, 3000)}`;
   const kbText = ST.kb.length > 0 ? `\nCONTEXTE ADDITIONNEL :\n${ST.kb.map(e => '• ' + e).join('\n')}\n` : '';
 
   const exRef = POST_EXAMPLES[ST.profile]?.[0];
@@ -1142,6 +1424,7 @@ function renderPosts() {
 
   ST.currentVariant = 0;
   showVariant(0);
+  updateLiPublishVisibility();
 }
 
 function showVariant(i) {
@@ -1293,7 +1576,7 @@ function exportCsv() {
 }
 
 function newPost() {
-  ST.brief = ''; ST.article = ''; ST.selectedAngle = null; ST.proposedAngles = []; ST.posts = []; ST.currentVariant = 0; ST.kb = []; ST.kbMeta = []; ST.webSearch = false;
+  ST.brief = ''; ST.article = ''; ST.wpSelectedId = null; ST.selectedAngle = null; ST.proposedAngles = []; ST.posts = []; ST.currentVariant = 0; ST.kb = []; ST.kbMeta = []; ST.webSearch = false;
   document.getElementById('brief-input').value = '';
   document.getElementById('article-input').value = '';
   document.getElementById('kb-input').value = '';
@@ -1319,6 +1602,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('api-key-input');
   if (saved && input) input.value = saved;
   updateApiKeyBar();
+
+  const savedWp = getWpUrl();
+  const wpInput = document.getElementById('wp-url-input');
+  if (savedWp && wpInput) wpInput.value = savedWp;
+  updateWpBar();
+
+  const savedLi = getLiToken();
+  const liInput = document.getElementById('li-token-input');
+  if (savedLi && liInput) liInput.value = savedLi;
+  updateLiBar();
 });
 </script>
 </body>
