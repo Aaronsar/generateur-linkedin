@@ -378,7 +378,18 @@ textarea { min-height:80px; }
     <span id="wp-url-status" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
   </div>
 
-  <!-- BUFFER (désactivé pour le moment) -->
+  <!-- BASE DE CONNAISSANCES GLOBALE -->
+  <div id="global-kb-section" style="max-width:520px;width:100%;margin-bottom:32px;">
+    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:8px;padding-left:18px;">BASE DE CONNAISSANCES</div>
+    <div style="padding:0 4px;">
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input type="text" id="global-kb-input" placeholder="Ex: En PASS il n'y a qu'une seule tentative, pas deux…" onkeydown="if(event.key==='Enter')addGlobalKb()" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:100px;padding:9px 16px;font-family:'Outfit',sans-serif;font-size:12px;color:#ccc;outline:none;" />
+        <button onclick="addGlobalKb()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:100px;padding:8px 16px;color:#aaa;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">+ Ajouter</button>
+      </div>
+      <div id="global-kb-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+      <div id="global-kb-count" style="font-size:10px;color:#555;font-family:'Outfit',sans-serif;margin-top:4px;padding-left:12px;"></div>
+    </div>
+  </div>
 
   <div class="profile-grid">
     <div class="profile-card profile-diploma" onclick="launchProfile('diploma')">
@@ -842,6 +853,48 @@ async function selectWpArticle(id) {
   } catch(e) {
     statusEl.textContent = `❌ Erreur chargement : ${e.message}`;
   }
+}
+
+// ── GLOBAL KNOWLEDGE BASE ─────────────────────────────────────────────
+function getGlobalKb() {
+  try { return JSON.parse(localStorage.getItem('global_kb') || '[]'); } catch { return []; }
+}
+function setGlobalKb(entries) {
+  localStorage.setItem('global_kb', JSON.stringify(entries));
+}
+function addGlobalKb() {
+  const input = document.getElementById('global-kb-input');
+  const val = input.value.trim();
+  if (!val) return;
+  const entries = getGlobalKb();
+  entries.push(val);
+  setGlobalKb(entries);
+  input.value = '';
+  renderGlobalKb();
+}
+function removeGlobalKb(i) {
+  const entries = getGlobalKb();
+  entries.splice(i, 1);
+  setGlobalKb(entries);
+  renderGlobalKb();
+}
+function renderGlobalKb() {
+  const entries = getGlobalKb();
+  const list = document.getElementById('global-kb-list');
+  const count = document.getElementById('global-kb-count');
+  if (!list) return;
+  list.innerHTML = entries.map((e, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:100px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);">
+      <span style="font-size:11px;color:#ccc;flex:1;font-family:'Outfit',sans-serif;line-height:1.4;">${escHtml(e)}</span>
+      <button onclick="removeGlobalKb(${i})" style="background:none;border:none;color:#666;cursor:pointer;font-size:14px;padding:0 4px;flex-shrink:0;">&times;</button>
+    </div>
+  `).join('');
+  count.textContent = entries.length > 0 ? `${entries.length} entrée${entries.length > 1 ? 's' : ''}` : '';
+}
+function getGlobalKbText() {
+  const entries = getGlobalKb();
+  if (entries.length === 0) return '';
+  return `\nBASE DE CONNAISSANCES (VÉRITÉS À RESPECTER IMPÉRATIVEMENT) :\n${entries.map(e => '⚠️ ' + e).join('\n')}\n`;
 }
 
 // ── BUFFER ────────────────────────────────────────────────────────────
@@ -1435,6 +1488,7 @@ async function proposeAngles() {
   const wpTitle = ST.source === 'wordpress' ? (_wpArticles.find(a => a.id === ST.wpSelectedId)?.title || '') : '';
   const sourceContent = ST.source === 'brief' ? `BRIEF : ${ST.brief}` : ST.source === 'wordpress' ? `ARTICLE WORDPRESS "${wpTitle}" :\n${ST.article.substring(0, 3000)}` : `ARTICLE À TRANSFORMER :\n${ST.article.substring(0, 3000)}`;
   const kbText = ST.kb.length > 0 ? `\nCONTEXTE ADDITIONNEL :\n${ST.kb.map(e => '• ' + e).join('\n')}\n` : '';
+  const globalKbText = getGlobalKbText();
 
   const exRef = POST_EXAMPLES[ST.profile]?.[0];
   const styleRef = exRef ? `\nEXEMPLE DE STYLE (référence) :\nHook : ${exRef.hook}\n${exRef.body.substring(0, 300)}…` : '';
@@ -1442,7 +1496,7 @@ async function proposeAngles() {
   const prompt = `Tu es un expert LinkedIn pour le profil "${p.name}" (${p.role}).
 
 ${sourceContent}
-${kbText}
+${kbText}${globalKbText}
 CONTEXTE DU PROFIL : ${p.context}
 TON : ${p.tone}
 TYPES DE CONTENUS : ${p.contentTypes}
@@ -1551,6 +1605,7 @@ async function startGeneration() {
   const p = PROFILES[ST.profile];
   const sourceContent = ST.source === 'brief' ? `BRIEF : ${ST.brief}` : `ARTICLE SOURCE :\n${ST.article.substring(0, 3000)}`;
   const kbText = ST.kb.length > 0 ? `\nCONTEXTE ADDITIONNEL :\n${ST.kb.map(e => '• ' + e).join('\n')}\n` : '';
+  const globalKbText = getGlobalKbText();
 
   const exRef = POST_EXAMPLES[ST.profile]?.[0];
   const styleBlock = exRef ? `
@@ -1577,7 +1632,7 @@ CONTEXTE : ${p.context}
 TON : ${p.tone}
 
 ${sourceContent}
-${kbText}
+${kbText}${globalKbText}
 
 ${anglesBlock}
 
@@ -1856,8 +1911,10 @@ document.addEventListener('DOMContentLoaded', () => {
   updateWpBar();
 
   // Buffer désactivé pour le moment
-  // Nettoyage de l'ancienne clé si elle existe
   localStorage.removeItem('buffer_api_key');
+
+  // Load global knowledge base
+  renderGlobalKb();
 });
 </script>
 </body>
