@@ -855,6 +855,15 @@ function onBufferKeyChange(val) {
   updateBufferBar();
   if (val.trim().length > 10) {
     loadBufferChannels();
+  } else {
+    // Clear channels section and error when key is removed
+    const section = document.getElementById('buffer-channels-section');
+    const list = document.getElementById('buffer-channels-list');
+    const statusEl = document.getElementById('buffer-channels-status');
+    if (section) section.style.display = 'none';
+    if (list) list.innerHTML = '';
+    if (statusEl) statusEl.textContent = '';
+    bufferChannelsCache = [];
   }
 }
 
