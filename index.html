@@ -366,30 +366,17 @@ textarea { min-height:80px; }
     <span id="wp-url-status" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
   </div>
 
-  <!-- LINKEDIN TOKENS (1 per profile) -->
-  <div style="max-width:520px;width:100%;margin-bottom:32px;">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:8px;padding-left:18px;">COMPTES LINKEDIN (optionnel)</div>
-
-    <div class="li-token-row" id="li-bar-diploma" style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding:9px 18px;border-radius:100px;width:100%;transition:all 0.2s;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);">
-      <span class="li-dot" id="li-dot-diploma" style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#888;"></span>
-      <span style="font-family:'Outfit',sans-serif;font-size:11px;color:#d4af55;flex-shrink:0;min-width:120px;font-weight:600;">Diploma Santé</span>
-      <input type="password" id="li-token-diploma" placeholder="Access token…" oninput="onLiTokenChange('diploma',this.value)" style="flex:1;background:transparent;border:none;outline:none;font-family:'DM Mono',monospace;font-size:11px;color:#ccc;padding:0;" autocomplete="off" spellcheck="false" />
-      <span class="li-status-dot" id="li-status-diploma" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
-    </div>
-
-    <div class="li-token-row" id="li-bar-benjamin" style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding:9px 18px;border-radius:100px;width:100%;transition:all 0.2s;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);">
-      <span class="li-dot" id="li-dot-benjamin" style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#888;"></span>
-      <span style="font-family:'Outfit',sans-serif;font-size:11px;color:#c084fc;flex-shrink:0;min-width:120px;font-weight:600;">Benjamin H.</span>
-      <input type="password" id="li-token-benjamin" placeholder="Access token…" oninput="onLiTokenChange('benjamin',this.value)" style="flex:1;background:transparent;border:none;outline:none;font-family:'DM Mono',monospace;font-size:11px;color:#ccc;padding:0;" autocomplete="off" spellcheck="false" />
-      <span class="li-status-dot" id="li-status-benjamin" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
-    </div>
-
-    <div class="li-token-row" id="li-bar-marketing" style="display:flex;align-items:center;gap:10px;margin-bottom:6px;padding:9px 18px;border-radius:100px;width:100%;transition:all 0.2s;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);">
-      <span class="li-dot" id="li-dot-marketing" style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#888;"></span>
-      <span style="font-family:'Outfit',sans-serif;font-size:11px;color:#38bdf8;flex-shrink:0;min-width:120px;font-weight:600;">Dir. Marketing</span>
-      <input type="password" id="li-token-marketing" placeholder="Access token…" oninput="onLiTokenChange('marketing',this.value)" style="flex:1;background:transparent;border:none;outline:none;font-family:'DM Mono',monospace;font-size:11px;color:#ccc;padding:0;" autocomplete="off" spellcheck="false" />
-      <span class="li-status-dot" id="li-status-marketing" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
-    </div>
+  <!-- BUFFER API KEY -->
+  <div id="buffer-bar" style="display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:10px 18px;border-radius:100px;max-width:520px;width:100%;transition:all 0.2s;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);">
+    <span id="buffer-dot" style="width:7px;height:7px;border-radius:50%;flex-shrink:0;background:#888;"></span>
+    <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#555;flex-shrink:0;">BUFFER</span>
+    <input type="password" id="buffer-key-input" placeholder="Clé API Buffer (optionnel)" oninput="onBufferKeyChange(this.value)" style="flex:1;background:transparent;border:none;outline:none;font-family:'DM Mono',monospace;font-size:12px;color:#ccc;padding:0;" autocomplete="off" spellcheck="false" />
+    <span id="buffer-status" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
+  </div>
+  <!-- Buffer channel mapping (hidden until connected) -->
+  <div id="buffer-channels-section" style="max-width:520px;width:100%;margin-bottom:32px;display:none;">
+    <div id="buffer-channels-list" style="padding:0 18px;"></div>
+    <div id="buffer-channels-status" style="font-family:'Outfit',sans-serif;font-size:11px;color:#666;padding:4px 18px;"></div>
   </div>
 
   <div class="profile-grid">
@@ -602,16 +589,18 @@ textarea { min-height:80px; }
           <div id="visual-suggestions"></div>
         </div>
 
-        <!-- LinkedIn Publish -->
+        <!-- Buffer Publish -->
         <div class="li-publish-section" id="li-publish-section" style="display:none;">
-          <div class="li-publish-label">in LinkedIn</div>
+          <div class="li-publish-label">via Buffer</div>
+          <div id="buffer-channel-info" style="font-size:12px;color:var(--text-dim);margin-bottom:8px;"></div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <button class="btn-li" id="btn-li-publish" onclick="publishToLinkedIn()">Publier sur LinkedIn</button>
+            <button class="btn-li" id="btn-li-publish" onclick="publishViaBuffer('shareNow')">🚀 Publier maintenant</button>
+            <button class="btn-li" id="btn-li-queue" onclick="publishViaBuffer('addToQueue')" style="background:rgba(0,119,181,0.15);">📋 Ajouter à la queue</button>
             <button class="btn-li" id="btn-li-schedule" onclick="toggleSchedule()" style="background:transparent;">📅 Programmer</button>
           </div>
           <div class="schedule-row" id="schedule-row" style="display:none;">
             <input type="datetime-local" id="schedule-datetime" />
-            <span style="font-size:11px;color:var(--text-muted);">Publication programmée via l'API</span>
+            <button class="btn-li" onclick="publishViaBuffer('customScheduled')" style="font-size:12px;padding:6px 14px;">Programmer ✓</button>
           </div>
           <div class="li-status" id="li-publish-status"></div>
         </div>
@@ -643,12 +632,13 @@ textarea { min-height:80px; }
           <div class="export-card" onclick="exportTxt()"><div class="export-icon">📄</div><div class="export-title">Fichier .txt</div><div class="export-desc">Télécharger toutes les variantes</div></div>
           <div class="export-card" onclick="exportCsv()"><div class="export-icon">📊</div><div class="export-title">Fichier .csv</div><div class="export-desc">Import dans outil de planification</div></div>
         </div>
-        <!-- LinkedIn Publish from Export -->
+        <!-- Buffer Publish from Export -->
         <div class="li-publish-section" id="li-export-section" style="display:none;">
-          <div class="li-publish-label">in Publier sur LinkedIn</div>
-          <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">Publie directement le post sélectionné sur ton profil LinkedIn.</div>
+          <div class="li-publish-label">via Buffer</div>
+          <div style="font-size:13px;color:var(--text-dim);margin-bottom:8px;">Publie ou programme le post via Buffer sur le compte LinkedIn du profil actif.</div>
           <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-            <button class="btn-li" id="btn-li-export-publish" onclick="publishToLinkedIn()">Publier maintenant</button>
+            <button class="btn-li" id="btn-li-export-publish" onclick="publishViaBuffer('shareNow')">🚀 Publier maintenant</button>
+            <button class="btn-li" onclick="publishViaBuffer('addToQueue')" style="background:rgba(0,119,181,0.15);">📋 Queue</button>
           </div>
           <div class="li-status" id="li-export-status"></div>
         </div>
@@ -844,55 +834,148 @@ async function selectWpArticle(id) {
   }
 }
 
-// ── LINKEDIN (1 token par profil) ────────────────────────────────────
-const LI_PROFILES = ['diploma', 'benjamin', 'marketing'];
+// ── BUFFER ────────────────────────────────────────────────────────────
+function getBufferKey() { return localStorage.getItem('buffer_api_key') || ''; }
+function setBufferKey(k) { localStorage.setItem('buffer_api_key', k); }
 
-function getLiToken(profileId) {
+// Channel mapping: profile → Buffer channelId
+function getBufferChannel(profileId) {
   const pid = profileId || ST.profile;
-  return localStorage.getItem(`linkedin_li_token_${pid}`) || '';
+  return localStorage.getItem(`buffer_channel_${pid}`) || '';
 }
-function setLiToken(profileId, t) {
-  localStorage.setItem(`linkedin_li_token_${profileId}`, t);
-}
-function getLiPersonId(profileId) {
-  const pid = profileId || ST.profile;
-  return localStorage.getItem(`linkedin_li_person_id_${pid}`) || '';
-}
-function setLiPersonId(profileId, id) {
-  localStorage.setItem(`linkedin_li_person_id_${profileId}`, id);
+function setBufferChannel(profileId, channelId) {
+  localStorage.setItem(`buffer_channel_${profileId}`, channelId);
 }
 
-function onLiTokenChange(profileId, val) {
-  setLiToken(profileId, val.trim());
-  updateLiBar(profileId);
-}
+// All fetched channels cached in memory
+let bufferChannelsCache = [];
 
-function updateLiBar(profileId) {
-  const token = getLiToken(profileId);
-  const dot = document.getElementById(`li-dot-${profileId}`);
-  const status = document.getElementById(`li-status-${profileId}`);
-  const bar = document.getElementById(`li-bar-${profileId}`);
-  if (!dot || !bar) return;
-  const ok = token.length > 10;
-  dot.style.background = ok ? '#22c55e' : '#888';
-  bar.style.borderColor = ok ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)';
-  bar.style.background = ok ? 'rgba(34,197,94,0.05)' : 'rgba(255,255,255,0.04)';
-  if (status) {
-    status.textContent = ok ? '✓ Connecté' : '';
-    status.style.color = ok ? '#22c55e' : '#888';
+function onBufferKeyChange(val) {
+  setBufferKey(val.trim());
+  updateBufferBar();
+  if (val.trim().length > 10) {
+    loadBufferChannels();
   }
 }
 
-function updateAllLiBars() {
-  LI_PROFILES.forEach(p => updateLiBar(p));
+function updateBufferBar() {
+  const key = getBufferKey();
+  const dot = document.getElementById('buffer-dot');
+  const status = document.getElementById('buffer-status');
+  const bar = document.getElementById('buffer-bar');
+  if (!bar) return;
+  const ok = key.length > 10;
+  dot.style.background = ok ? '#22c55e' : '#888';
+  bar.style.borderColor = ok ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)';
+  bar.style.background = ok ? 'rgba(34,197,94,0.05)' : 'rgba(255,255,255,0.04)';
+  status.textContent = ok ? '✓ Connecté' : '';
+  status.style.color = ok ? '#22c55e' : '#888';
+}
+
+async function loadBufferChannels() {
+  const key = getBufferKey();
+  if (!key) return;
+  const section = document.getElementById('buffer-channels-section');
+  const list = document.getElementById('buffer-channels-list');
+  const statusEl = document.getElementById('buffer-channels-status');
+  section.style.display = '';
+  statusEl.textContent = '⏳ Chargement des channels…';
+  list.innerHTML = '';
+
+  try {
+    const res = await fetch('/api/buffer-publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ apiKey: key, action: 'get-channels' })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    bufferChannelsCache = data.channels || [];
+    const linkedinCh = bufferChannelsCache;
+
+    if (linkedinCh.length === 0) {
+      statusEl.textContent = '⚠️ Aucun channel LinkedIn trouvé dans Buffer';
+      return;
+    }
+
+    statusEl.textContent = `${linkedinCh.length} channel${linkedinCh.length > 1 ? 's' : ''} LinkedIn trouvé${linkedinCh.length > 1 ? 's' : ''}`;
+
+    // Profile mapping config
+    const profileMap = {
+      diploma:   { label: 'Diploma Santé', color: '#d4af55' },
+      benjamin:  { label: 'Benjamin H.', color: '#c084fc' },
+      marketing: { label: 'Dir. Marketing', color: '#38bdf8' }
+    };
+
+    // Auto-map if channels match profile names, or show dropdowns
+    Object.keys(profileMap).forEach(pid => {
+      const pm = profileMap[pid];
+      const saved = getBufferChannel(pid);
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:6px;';
+
+      const label = document.createElement('span');
+      label.style.cssText = `font-family:'Outfit',sans-serif;font-size:11px;color:${pm.color};font-weight:600;min-width:110px;`;
+      label.textContent = pm.label;
+
+      const sel = document.createElement('select');
+      sel.id = `buffer-ch-${pid}`;
+      sel.style.cssText = "flex:1;background:#1a1a1a;color:#ccc;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:6px 10px;font-family:'Outfit',sans-serif;font-size:12px;outline:none;cursor:pointer;";
+
+      const optNone = document.createElement('option');
+      optNone.value = '';
+      optNone.textContent = '— Aucun —';
+      sel.appendChild(optNone);
+
+      linkedinCh.forEach(ch => {
+        const opt = document.createElement('option');
+        opt.value = ch.id;
+        const displayName = ch.displayName || ch.name || ch.id;
+        opt.textContent = `${displayName} (${ch.type || 'profile'})`;
+        if (ch.id === saved) opt.selected = true;
+        sel.appendChild(opt);
+      });
+
+      // Auto-map by name if no saved selection
+      if (!saved && linkedinCh.length > 0) {
+        const autoMatch = linkedinCh.find(ch => {
+          const n = (ch.displayName || ch.name || '').toLowerCase();
+          if (pid === 'diploma') return n.includes('diploma');
+          if (pid === 'benjamin') return n.includes('benjamin') || n.includes('haddad');
+          if (pid === 'marketing') return n.includes('marketing') || n.includes('directeur');
+          return false;
+        });
+        if (autoMatch) {
+          sel.value = autoMatch.id;
+          setBufferChannel(pid, autoMatch.id);
+        }
+      }
+
+      sel.onchange = () => setBufferChannel(pid, sel.value);
+
+      row.appendChild(label);
+      row.appendChild(sel);
+      list.appendChild(row);
+    });
+
+  } catch (err) {
+    statusEl.textContent = `❌ ${err.message}`;
+    statusEl.style.color = '#ef4444';
+  }
 }
 
 function updateLiPublishVisibility() {
-  const hasToken = getLiToken(ST.profile).length > 10;
+  const hasBuffer = getBufferKey().length > 10 && getBufferChannel(ST.profile);
   const sect = document.getElementById('li-publish-section');
   const exportSect = document.getElementById('li-export-section');
-  if (sect) sect.style.display = hasToken ? '' : 'none';
-  if (exportSect) exportSect.style.display = hasToken ? '' : 'none';
+  const info = document.getElementById('buffer-channel-info');
+  if (sect) sect.style.display = hasBuffer ? '' : 'none';
+  if (exportSect) exportSect.style.display = hasBuffer ? '' : 'none';
+  if (info && hasBuffer) {
+    const ch = bufferChannelsCache.find(c => c.id === getBufferChannel(ST.profile));
+    info.textContent = ch ? `Channel : ${ch.displayName || ch.name}` : '';
+  }
 }
 
 function toggleSchedule() {
@@ -900,11 +983,11 @@ function toggleSchedule() {
   row.style.display = row.style.display === 'none' ? '' : 'none';
 }
 
-async function publishToLinkedIn() {
-  const token = getLiToken(ST.profile);
-  if (!token) {
-    const profileName = PROFILES[ST.profile]?.name || ST.profile;
-    alert(`⚠️ Configure le token LinkedIn pour "${profileName}" sur l'écran d'accueil.`);
+async function publishViaBuffer(mode) {
+  const key = getBufferKey();
+  const channelId = getBufferChannel(ST.profile);
+  if (!key || !channelId) {
+    alert('⚠️ Configure ta clé API Buffer et assigne un channel LinkedIn sur l\'écran d\'accueil.');
     return;
   }
   const post = ST.posts[ST.currentVariant];
@@ -912,37 +995,58 @@ async function publishToLinkedIn() {
 
   const btn = document.getElementById('btn-li-publish');
   const statusEl = document.getElementById('li-publish-status');
-  btn.disabled = true;
-  btn.textContent = '⏳ Publication…';
-  statusEl.textContent = '';
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Envoi vers Buffer…'; }
+  if (statusEl) statusEl.textContent = '';
 
   const fullText = post.hook + '\n\n' + post.body + '\n\n' + (post.hashtags || '');
 
+  const payload = {
+    apiKey: key,
+    action: 'publish',
+    channelId,
+    text: fullText,
+    mode
+  };
+
+  // Add scheduled time if customScheduled
+  if (mode === 'customScheduled') {
+    const dtInput = document.getElementById('schedule-datetime');
+    if (!dtInput || !dtInput.value) {
+      alert('⚠️ Choisis une date et heure pour programmer le post.');
+      if (btn) { btn.disabled = false; btn.textContent = '🚀 Publier maintenant'; }
+      return;
+    }
+    payload.dueAt = new Date(dtInput.value).toISOString();
+  }
+
   try {
-    const res = await fetch('/api/linkedin-publish', {
+    const res = await fetch('/api/buffer-publish', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token,
-        text: fullText,
-        personId: getLiPersonId(ST.profile)
-      })
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
-    if (data.personId) setLiPersonId(ST.profile, data.personId);
-
-    btn.textContent = '✅ Publié !';
-    btn.classList.add('li-success');
-    statusEl.innerHTML = data.postUrl
-      ? `<a href="${data.postUrl}" target="_blank" rel="noopener" style="color:#0077b5;text-decoration:underline;">Voir le post sur LinkedIn →</a>`
-      : '✅ Post publié avec succès !';
+    const modeLabels = {
+      shareNow: '✅ Publié !',
+      addToQueue: '✅ Ajouté à la queue !',
+      customScheduled: '✅ Programmé !',
+      shareNext: '✅ Programmé en suivant !'
+    };
+    if (btn) {
+      btn.textContent = modeLabels[mode] || '✅ Envoyé !';
+      btn.classList.add('li-success');
+    }
+    if (statusEl) {
+      statusEl.innerHTML = `<span style="color:#22c55e;">${modeLabels[mode] || '✅ Envoyé !'}</span> <a href="https://publish.buffer.com" target="_blank" rel="noopener" style="color:#0077b5;text-decoration:underline;margin-left:8px;">Voir dans Buffer →</a>`;
+    }
   } catch(err) {
-    btn.disabled = false;
-    btn.textContent = 'Publier sur LinkedIn';
-    statusEl.textContent = `❌ ${err.message}`;
-    statusEl.style.color = '#ef4444';
+    if (btn) { btn.disabled = false; btn.textContent = '🚀 Publier maintenant'; }
+    if (statusEl) {
+      statusEl.textContent = `❌ ${err.message}`;
+      statusEl.style.color = '#ef4444';
+    }
   }
 }
 
@@ -1662,13 +1766,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (savedWp && wpInput) wpInput.value = savedWp;
   updateWpBar();
 
-  // Load per-profile LinkedIn tokens
-  LI_PROFILES.forEach(pid => {
-    const saved = getLiToken(pid);
-    const inp = document.getElementById(`li-token-${pid}`);
-    if (saved && inp) inp.value = saved;
-  });
-  updateAllLiBars();
+  // Load Buffer API key
+  const savedBuffer = getBufferKey();
+  const bufferInput = document.getElementById('buffer-key-input');
+  if (savedBuffer && bufferInput) bufferInput.value = savedBuffer;
+  updateBufferBar();
+  if (savedBuffer && savedBuffer.length > 10) {
+    loadBufferChannels();
+  }
 });
 </script>
 </body>
