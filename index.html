@@ -32,8 +32,8 @@ html { scroll-behavior: smooth; }
 }
 .selector-title { font-family: 'Syne', sans-serif; font-size: clamp(20px, 3vw, 32px); font-weight: 800; color: #fff; text-align: center; margin-bottom: 8px; letter-spacing: -0.5px; }
 .selector-sub { font-family: 'Outfit', sans-serif; font-size: 14px; color: #666; text-align: center; margin-bottom: 48px; }
-.profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1100px; width: 100%; }
-@media (max-width: 860px) { .profile-grid { grid-template-columns: 1fr 1fr; } }
+.profile-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; max-width: 1400px; width: 100%; }
+@media (max-width: 1100px) { .profile-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .profile-grid { grid-template-columns: 1fr; } }
 
 .profile-card {
@@ -56,30 +56,39 @@ html { scroll-behavior: smooth; }
 .profile-marketing::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #0891b2, transparent); }
 .profile-marketing:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(8,145,178,0.15); }
 
+.profile-ilan { background: linear-gradient(135deg, #0a1f1a 0%, #133d30 50%, #0a1f1a 100%); border: 1px solid rgba(16,185,129,0.25); box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+.profile-ilan::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, #10b981, transparent); }
+.profile-ilan:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(16,185,129,0.12); }
+
 .profile-logo { font-weight: 700; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; position: relative; z-index: 1; }
 .profile-diploma .profile-logo { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: #d4af55; letter-spacing: 3px; }
 .profile-benjamin .profile-logo { font-family: 'Syne', sans-serif; font-size: 13px; color: #c084fc; letter-spacing: 1px; }
 .profile-marketing .profile-logo { font-family: 'Syne', sans-serif; font-size: 13px; color: #38bdf8; letter-spacing: 1px; font-weight: 700; }
+.profile-ilan .profile-logo { font-family: 'Syne', sans-serif; font-size: 13px; color: #10b981; letter-spacing: 1px; font-weight: 700; }
 
 .profile-title { font-size: clamp(18px, 2.5vw, 26px); font-weight: 700; line-height: 1.2; color: #fff; margin-bottom: 10px; position: relative; z-index: 1; }
 .profile-diploma .profile-title { font-family: 'Playfair Display', serif; font-weight: 600; }
 .profile-benjamin .profile-title { font-family: 'Syne', sans-serif; font-weight: 700; }
 .profile-marketing .profile-title { font-family: 'Syne', sans-serif; font-weight: 700; }
+.profile-ilan .profile-title { font-family: 'Syne', sans-serif; font-weight: 700; }
 
 .profile-desc { font-size: 12px; line-height: 1.5; position: relative; z-index: 1; margin-bottom: 20px; }
 .profile-diploma .profile-desc { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: rgba(212,175,85,0.7); }
 .profile-benjamin .profile-desc { font-family: 'Outfit', sans-serif; color: rgba(200,180,255,0.6); }
 .profile-marketing .profile-desc { font-family: 'Outfit', sans-serif; color: rgba(200,230,240,0.55); }
+.profile-ilan .profile-desc { font-family: 'Outfit', sans-serif; color: rgba(160,230,200,0.6); }
 
 .profile-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 100px; border: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; width: fit-content; position: relative; z-index: 1; }
 .profile-diploma .profile-btn { background: rgba(212,175,85,0.15); color: #d4af55; border: 1px solid rgba(212,175,85,0.3); font-family: 'Cormorant Garamond', serif; font-size: 14px; }
 .profile-benjamin .profile-btn { background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); font-family: 'Outfit', sans-serif; }
 .profile-marketing .profile-btn { background: rgba(8,145,178,0.12); color: #38bdf8; border: 1px solid rgba(8,145,178,0.3); font-family: 'Syne', sans-serif; }
+.profile-ilan .profile-btn { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); font-family: 'Outfit', sans-serif; }
 
 /* ======================== THEMES ======================== */
 .theme-diploma { --bg:#f8f6f0;--bg2:#fff;--surface:#fff;--surface2:#f2ede4;--border:#e2d9c8;--accent:#0f1c3a;--accent2:#d4af55;--accent3:#8b0000;--text:#1a1208;--text-dim:#6b5e45;--text-muted:#b8a98a;--radius:4px; background:var(--bg);color:var(--text);font-family:'Cormorant Garamond',serif; }
 .theme-benjamin { --bg:#f8f5fc;--bg2:#fff;--surface:#fff;--surface2:#f0ebf5;--border:#d8cce8;--accent:#6d28d9;--accent2:#a855f7;--accent3:#c2622a;--text:#1a0f2e;--text-dim:#5a4670;--text-muted:#a890c0;--radius:12px; background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif; }
 .theme-marketing { --bg:#f4f8fb;--bg2:#fff;--surface:#fff;--surface2:#e8f4f8;--border:#c8e0ea;--accent:#0891b2;--accent2:#0e7490;--accent3:#1a3a7a;--text:#0c1f2a;--text-dim:#3a6070;--text-muted:#8ab0be;--radius:8px; background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif; }
+.theme-ilan { --bg:#f2faf6;--bg2:#fff;--surface:#fff;--surface2:#e6f5ee;--border:#c0e0d2;--accent:#065f46;--accent2:#10b981;--accent3:#0d9488;--text:#0a1f1a;--text-dim:#2d6a5a;--text-muted:#7ab8a4;--radius:10px; background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif; }
 
 /* ======================== APP LAYOUT ======================== */
 #app-wrapper { display: none; min-height: 100vh; }
@@ -88,6 +97,7 @@ html { scroll-behavior: smooth; }
 .theme-diploma .app-header { background:rgba(248,246,240,0.95); }
 .theme-benjamin .app-header { background:rgba(248,245,252,0.95); }
 .theme-marketing .app-header { background:rgba(244,248,251,0.95); }
+.theme-ilan .app-header { background:rgba(242,250,246,0.95); }
 
 .app-logo { display:flex;align-items:center;gap:10px;font-weight:700; }
 .theme-diploma .app-logo { font-family:'Playfair Display',serif;font-size:17px;color:var(--accent); }
@@ -96,6 +106,8 @@ html { scroll-behavior: smooth; }
 .theme-benjamin .app-logo span { color:var(--accent2); }
 .theme-marketing .app-logo { font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--accent); }
 .theme-marketing .app-logo span { color:var(--accent2); }
+.theme-ilan .app-logo { font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--accent); }
+.theme-ilan .app-logo span { color:var(--accent2); }
 
 .back-btn { display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;font-size:12px;font-family:inherit;transition:all 0.2s; }
 .back-btn:hover { color:var(--text);border-color:var(--accent); }
@@ -392,6 +404,15 @@ textarea { min-height:80px; }
         <div class="profile-logo">Directeur Marketing</div>
         <div class="profile-title">Posts business<br>et coulisses</div>
         <div class="profile-desc">Marketing, entrepreneuriat, croissance, organisation, stratégie d'acquisition — ton direct et dynamique.</div>
+      </div>
+      <button class="profile-btn">Lancer →</button>
+    </div>
+
+    <div class="profile-card profile-ilan" onclick="launchProfile('ilan')">
+      <div>
+        <div class="profile-logo">Ilan Benhamou</div>
+        <div class="profile-title">Posts pédagogiques<br>et terrain</div>
+        <div class="profile-desc">Direction pédagogique, accompagnement des élèves, méthodes de travail, résultats et vie de la prépa.</div>
       </div>
       <button class="profile-btn">Lancer →</button>
     </div>
@@ -1082,6 +1103,17 @@ const PROFILES = {
     context: 'Directeur marketing de Diploma Santé, prépa médecine leader en Île-de-France. Gère l\'acquisition, la stratégie digitale, les événements, le branding.',
     contentTypes: 'Lancement événement, résultats marketing, embauche collaborateur, organisation interne, stratégie d\'acquisition, coulisses.',
     sign: 'Le Directeur Marketing — Diploma Santé'
+  },
+  ilan: {
+    name: 'Ilan Benhamou',
+    logoHtml: 'Ilan <span>Benhamou</span>',
+    theme: 'theme-ilan',
+    avatar: 'IB',
+    role: 'Directeur Pédagogique · Diploma Santé',
+    tone: 'Pédagogue, bienveillant, concret et terrain. Posts centrés sur l\'accompagnement des élèves, les méthodes qui marchent, et les résultats obtenus. Ton accessible et motivant, jamais condescendant.',
+    context: 'Ilan Benhamou est directeur pédagogique de Diploma Santé, prépa médecine d\'excellence à Paris. Il supervise les programmes, les enseignants et l\'accompagnement personnalisé des élèves. Il est au contact direct des étudiants et connaît les difficultés du terrain. Il optimise les méthodes pédagogiques pour maximiser les chances de réussite.',
+    contentTypes: 'Méthodes de travail efficaces, conseils pédagogiques, retours terrain sur les élèves, résultats et classements, innovations pédagogiques, vie de la prépa au quotidien.',
+    sign: 'Ilan Benhamou'
   }
 };
 
@@ -1156,6 +1188,48 @@ Elle ne se décrète pas.
 Le marketing dans l'éducation n'est pas du marketing.
 C'est de la pédagogie appliquée à la communication.`,
       hashtags: '#Marketing #EdTech #Croissance #Stratégie #DiplomaSanté'
+    }
+  ],
+  ilan: [
+    {
+      type: 'méthode',
+      hook: '80% des échecs en PASS ne sont pas liés à l\'intelligence.\n\nIls sont liés à la méthode de travail.',
+      body: `Depuis que je dirige la pédagogie chez Diploma Santé, j'ai observé un schéma récurrent :
+
+Les étudiants qui échouent travaillent souvent PLUS que ceux qui réussissent.
+
+La différence ?
+→ La qualité du travail, pas la quantité
+→ La régularité plutôt que les marathons de révision
+→ L'auto-évaluation plutôt que la relecture passive
+
+On a mis en place un suivi pédagogique individuel.
+Chaque semaine, chaque élève sait exactement où il en est.
+
+Pas de surprises. Pas de zones d'ombre.
+Juste une progression mesurable, semaine après semaine.`,
+      hashtags: '#Pédagogie #PASS #MédecineStudies #Méthode #DiplomaSanté'
+    },
+    {
+      type: 'terrain',
+      hook: 'Ce matin, un élève m\'a dit :\n\n"C\'est la première fois qu\'on me dit exactement CE que je dois corriger."',
+      body: `C'est exactement pour ça qu'on fait ce métier.
+
+En prépa médecine classique, l'élève est souvent livré à lui-même.
+Il assiste aux cours, il rentre chez lui, il révise.
+
+Chez Diploma Santé, on a fait un choix différent :
+→ Classes de 25 élèves maximum
+→ Colles individuelles régulières
+→ Analyse des erreurs poste par poste
+→ Plan de progression personnalisé
+
+Le résultat ?
+L'élève ne travaille pas plus.
+Il travaille mieux.
+
+Et quand il comprend la différence, tout change.`,
+      hashtags: '#DirecteurPédagogique #Accompagnement #Prépa #Médecine #DiplomaSanté'
     }
   ]
 };
