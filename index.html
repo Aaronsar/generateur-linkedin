@@ -378,10 +378,16 @@ textarea { min-height:80px; }
     <span id="wp-url-status" style="font-size:10px;flex-shrink:0;font-family:'Outfit',sans-serif;color:#555;"></span>
   </div>
 
-  <!-- BASE DE CONNAISSANCES GLOBALE -->
-  <div id="global-kb-section" style="max-width:520px;width:100%;margin-bottom:32px;">
-    <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#555;margin-bottom:8px;padding-left:18px;">BASE DE CONNAISSANCES</div>
-    <div style="padding:0 4px;">
+  <!-- BASE DE CONNAISSANCES GLOBALE (collapsible) -->
+  <div id="global-kb-section" style="max-width:520px;width:100%;margin-bottom:20px;">
+    <div onclick="toggleKbPanel()" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 18px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:100px;transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.25)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.1)'">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#888;">BASE DE CONNAISSANCES</span>
+        <span id="global-kb-badge" style="font-size:10px;color:#555;font-family:'Outfit',sans-serif;"></span>
+      </div>
+      <span id="kb-chevron" style="color:#555;font-size:12px;transition:transform 0.2s;">&#9660;</span>
+    </div>
+    <div id="kb-panel" style="display:none;padding:10px 4px 0;">
       <div style="display:flex;gap:8px;margin-bottom:8px;">
         <input type="text" id="global-kb-input" placeholder="Ex: En PASS il n'y a qu'une seule tentative…" onkeydown="if(event.key==='Enter')addGlobalKb()" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:100px;padding:9px 16px;font-family:'Outfit',sans-serif;font-size:12px;color:#ccc;outline:none;" />
         <button onclick="addGlobalKb()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:100px;padding:8px 16px;color:#aaa;font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;">+ Texte</button>
@@ -394,8 +400,7 @@ textarea { min-height:80px; }
         </label>
       </div>
       <div id="global-kb-loading" style="display:none;font-family:'Outfit',sans-serif;font-size:11px;color:#888;padding:4px 12px;">⏳ Extraction en cours…</div>
-      <div id="global-kb-list" style="display:flex;flex-direction:column;gap:4px;"></div>
-      <div id="global-kb-count" style="font-size:10px;color:#555;font-family:'Outfit',sans-serif;margin-top:4px;padding-left:12px;"></div>
+      <div id="global-kb-list" style="display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto;"></div>
     </div>
   </div>
 
@@ -888,10 +893,17 @@ function removeGlobalKb(i) {
   setGlobalKb(entries);
   renderGlobalKb();
 }
+function toggleKbPanel() {
+  const panel = document.getElementById('kb-panel');
+  const chevron = document.getElementById('kb-chevron');
+  const open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
 function renderGlobalKb() {
   const entries = getGlobalKb();
   const list = document.getElementById('global-kb-list');
-  const count = document.getElementById('global-kb-count');
+  const badge = document.getElementById('global-kb-badge');
   if (!list) return;
   list.innerHTML = entries.map((e, i) => {
     const isFile = e.startsWith('[');
@@ -904,7 +916,7 @@ function renderGlobalKb() {
       <button onclick="removeGlobalKb(${i})" style="background:none;border:none;color:#666;cursor:pointer;font-size:14px;padding:0 4px;flex-shrink:0;">&times;</button>
     </div>`;
   }).join('');
-  count.textContent = entries.length > 0 ? `${entries.length} entrée${entries.length > 1 ? 's' : ''}` : '';
+  if (badge) badge.textContent = entries.length > 0 ? `(${entries.length})` : '';
 }
 // File extraction for KB
 async function extractPdfText(file) {
