@@ -1520,11 +1520,10 @@ function updateAngleSelection() {
   const btn = document.getElementById('btn-generate');
   const count = ST.selectedAngles ? ST.selectedAngles.length : 0;
   if (count > 0) {
-    const postCount = Math.max(10, count * 3);
-    label.textContent = `${count} angle${count > 1 ? 's' : ''} → ~${postCount} posts`;
+    label.textContent = `${count} angle${count > 1 ? 's' : ''} → ${count} post${count > 1 ? 's' : ''}`;
     label.style.color = 'var(--accent)';
     btn.disabled = false;
-    btn.textContent = `✨ Générer ${postCount} posts →`;
+    btn.textContent = `✨ Générer ${count} post${count > 1 ? 's' : ''} →`;
   } else {
     label.textContent = '0 sélectionné';
     label.style.color = 'var(--text-dim)';
@@ -1543,9 +1542,10 @@ async function startGeneration() {
 
   const log = document.getElementById('gen-log');
   const status = document.getElementById('gen-status');
-  const totalPosts = Math.max(10, angles.length * 3);
+  const totalPosts = angles.length;
 
   log.textContent = '';
+  status.textContent = `✍️ Génération de ${totalPosts} post${totalPosts > 1 ? 's' : ''}…`;
   ST.posts = [];
 
   const p = PROFILES[ST.profile];
@@ -1564,18 +1564,13 @@ ${exRef.body}
 Hashtags : ${exRef.hashtags}
 ` : '';
 
-  // Generate posts in batches per angle
-  const postsPerAngle = Math.ceil(totalPosts / angles.length);
+  // Build angles list for prompt
+  const anglesBlock = angles.map((a, i) => `ANGLE ${i + 1} :
+- Hook proposé : ${a.hook}
+- Approche : ${a.angle}
+- Type : ${a.tag}`).join('\n\n');
 
-  for (let a = 0; a < angles.length; a++) {
-    const selectedData = angles[a];
-    const batchNum = a + 1;
-    const batchSize = (a === angles.length - 1) ? totalPosts - ST.posts.length : postsPerAngle;
-
-    log.textContent += `\n📌 Angle ${batchNum}/${angles.length} : ${selectedData.tag}\n`;
-    status.textContent = `✍️ Génération angle ${batchNum}/${angles.length} (${selectedData.tag})…`;
-
-    const prompt = `Tu es un expert LinkedIn qui rédige des posts pour le profil "${p.name}" (${p.role}).
+  const prompt = `Tu es un expert LinkedIn qui rédige des posts pour le profil "${p.name}" (${p.role}).
 
 PROFIL : ${p.name}
 CONTEXTE : ${p.context}
@@ -1584,10 +1579,7 @@ TON : ${p.tone}
 ${sourceContent}
 ${kbText}
 
-ANGLE SÉLECTIONNÉ :
-Hook proposé : ${selectedData.hook}
-Approche : ${selectedData.angle}
-Type : ${selectedData.tag}
+${anglesBlock}
 
 ${styleBlock}
 
@@ -1610,57 +1602,48 @@ HUMANISATION :
 - Varier la longueur des phrases
 - Ajouter des respirations (lignes vides)
 
-Génère exactement ${batchSize} posts LinkedIn DIFFÉRENTS pour cet angle.
-Chaque post doit avoir :
-- Un hook UNIQUE et différent des autres
-- Une approche / structure différente
-- Le même angle de fond mais traité différemment
+Génère exactement ${totalPosts} posts LinkedIn — UN post par angle ci-dessus.
+Chaque post doit être radicalement différent des autres.
 
 SUGGESTION VISUELLE :
-Pour chaque post, suggère brièvement un type de visuel adapté (photo, carrousel, infographie, etc.)
+Pour chaque post, suggère brièvement un type de visuel adapté.
 
 Réponds UNIQUEMENT en JSON valide sans markdown :
 {"posts":[
-  {"label":"Post ${ST.posts.length + 1}","hook":"...","body":"... (corps complet du post SANS le hook)","hashtags":"#tag1 #tag2","visual":"Description du visuel suggéré","score":{"hook":8,"structure":7,"engagement":8,"lisibilite":9,"global":8}}
+  {"label":"Post 1 — [type de l'angle]","hook":"...","body":"... (corps complet du post SANS le hook)","hashtags":"#tag1 #tag2","visual":"Description du visuel suggéré","score":{"hook":8,"structure":7,"engagement":8,"lisibilite":9,"global":8}}
 ]}
 
 IMPORTANT :
 - "hook" = les 2-3 premières lignes SEULEMENT (ce qui apparaît avant "voir plus")
 - "body" = tout le reste du post APRÈS le hook
 - "score" = note de 1 à 10 pour chaque critère
-- Génère exactement ${batchSize} posts
-- Numérote les labels : "Post ${ST.posts.length + 1}", "Post ${ST.posts.length + 2}", etc.
-- Chaque post doit être complet et publiable tel quel
-- AUCUN post ne doit se ressembler — hooks, structures et angles tous différents`;
+- Génère exactement ${totalPosts} posts (1 par angle)
+- Chaque post doit être complet et publiable tel quel`;
 
-    try {
-      const raw = (await callApiJson(prompt, 16000)).trim().replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(raw);
-      const newPosts = parsed.posts || [];
+  log.textContent += `📌 ${totalPosts} angles sélectionnés\n`;
+  angles.forEach((a, i) => { log.textContent += `  ${i + 1}. ${a.tag}\n`; });
+  log.textContent += `\n✍️ Génération en cours…\n`;
 
-      // Re-label posts
-      newPosts.forEach((post, i) => {
-        post.label = `Post ${ST.posts.length + i + 1}`;
-        post.angleTag = selectedData.tag;
-      });
+  try {
+    const raw = (await callApiJson(prompt, totalPosts > 4 ? 16000 : 12000)).trim().replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(raw);
+    ST.posts = parsed.posts || [];
 
-      ST.posts.push(...newPosts);
-      log.textContent += `  ✅ ${newPosts.length} posts générés (total: ${ST.posts.length})\n`;
+    // Tag each post with its angle
+    ST.posts.forEach((post, i) => {
+      if (angles[i]) post.angleTag = angles[i].tag;
+    });
 
-    } catch (err) {
-      log.textContent += `  ❌ Erreur angle "${selectedData.tag}": ${err.message}\n`;
-      console.error(err);
-    }
-  }
-
-  if (ST.posts.length > 0) {
-    log.textContent += `\n🎉 ${ST.posts.length} posts LinkedIn générés au total !\n`;
+    log.textContent += `\n🎉 ${ST.posts.length} posts générés !\n`;
     status.textContent = `✅ ${ST.posts.length} posts générés !`;
     await sleep(400);
     renderPosts();
     advance(3);
-  } else {
-    status.textContent = '❌ Aucun post généré';
+
+  } catch (err) {
+    log.textContent += `❌ Erreur : ${err.message}\n`;
+    status.textContent = 'Erreur';
+    console.error(err);
   }
 }
 
