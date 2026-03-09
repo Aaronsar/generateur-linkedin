@@ -1305,6 +1305,54 @@ const ST = {
   currentStep: 0
 };
 
+// ── SESSION PERSISTENCE ──────────────────────────────────────────────
+function saveSession() {
+  try {
+    sessionStorage.setItem('linkedin_session', JSON.stringify({
+      profile: ST.profile,
+      source: ST.source,
+      brief: ST.brief,
+      article: ST.article,
+      selectedAngle: ST.selectedAngle,
+      selectedAngles: ST.selectedAngles,
+      proposedAngles: ST.proposedAngles,
+      posts: ST.posts,
+      currentVariant: ST.currentVariant,
+      currentStep: ST.currentStep,
+      kb: ST.kb,
+      kbMeta: ST.kbMeta
+    }));
+  } catch (e) { /* sessionStorage full or unavailable */ }
+}
+
+function restoreSession() {
+  try {
+    const raw = sessionStorage.getItem('linkedin_session');
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (!saved.profile || !saved.posts || saved.posts.length === 0) return false;
+    // Restore state
+    Object.assign(ST, saved);
+    // Restore UI
+    const p = PROFILES[ST.profile];
+    if (!p) return false;
+    document.getElementById('profile-selector').style.display = 'none';
+    const app = document.getElementById('app-wrapper');
+    app.style.display = 'block'; app.className = p.theme;
+    document.getElementById('app-logo').innerHTML = p.logoHtml;
+    document.getElementById('sb-profile').textContent = p.name;
+    // Restore posts view
+    if (ST.posts.length > 0 && ST.currentStep >= 3) {
+      renderPosts();
+      showVariant(ST.currentVariant || 0);
+      switchStep(ST.currentStep);
+    } else {
+      switchStep(ST.currentStep);
+    }
+    return true;
+  } catch (e) { return false; }
+}
+
 // ── UI ───────────────────────────────────────────────────────────────
 const STEP_PANELS = ['p-0','p-1','p-2','p-3','p-4'];
 
@@ -1342,6 +1390,7 @@ function launchProfile(id) {
 }
 
 function backToSelector() {
+  sessionStorage.removeItem('linkedin_session');
   document.getElementById('app-wrapper').style.display = 'none';
   document.getElementById('profile-selector').style.display = 'flex';
 }
@@ -1694,6 +1743,7 @@ IMPORTANT :
     await sleep(400);
     renderPosts();
     advance(3);
+    saveSession();
 
   } catch (err) {
     log.textContent += `❌ Erreur : ${err.message}\n`;
@@ -1731,6 +1781,7 @@ function renderPosts() {
 
 function showVariant(i) {
   ST.currentVariant = i;
+  saveSession();
   const post = ST.posts[i];
   const p = PROFILES[ST.profile];
 
@@ -1878,6 +1929,7 @@ function exportCsv() {
 }
 
 function newPost() {
+  sessionStorage.removeItem('linkedin_session');
   ST.brief = ''; ST.article = ''; ST.wpSelectedId = null; ST.selectedAngle = null; ST.selectedAngles = []; ST.proposedAngles = []; ST.posts = []; ST.currentVariant = 0; ST.kb = []; ST.kbMeta = []; ST.webSearch = false;
   document.getElementById('brief-input').value = '';
   document.getElementById('article-input').value = '';
@@ -1915,6 +1967,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load global knowledge base
   renderGlobalKb();
+
+  // Restore session if posts exist (survive page reload)
+  restoreSession();
 });
 </script>
 </body>
