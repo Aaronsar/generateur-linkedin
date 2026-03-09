@@ -1242,6 +1242,7 @@ const ST = {
   article: '',
   wpSelectedId: null,
   selectedAngle: null,
+  selectedAngles: [],
   proposedAngles: [],
   posts: [],       // [{hook, body, hashtags, visual, score}] — index 0 = principal, 1-3 = variantes
   currentVariant: 0,
@@ -1276,7 +1277,7 @@ function advance(n) { ST.currentStep = n - 1; switchStep(n); }
 
 function launchProfile(id) {
   ST.profile = id;
-  ST.source = 'brief'; ST.brief = ''; ST.article = ''; ST.selectedAngle = null; ST.proposedAngles = []; ST.posts = []; ST.currentVariant = 0; ST.kb = []; ST.kbMeta = []; ST.webSearch = false; ST.currentStep = 0;
+  ST.source = 'brief'; ST.brief = ''; ST.article = ''; ST.selectedAngle = null; ST.selectedAngles = []; ST.proposedAngles = []; ST.posts = []; ST.currentVariant = 0; ST.kb = []; ST.kbMeta = []; ST.webSearch = false; ST.currentStep = 0;
   const p = PROFILES[id];
   document.getElementById('profile-selector').style.display = 'none';
   const app = document.getElementById('app-wrapper');
@@ -1477,6 +1478,7 @@ function renderAngles(angles) {
   document.getElementById('angles-card').style.display = 'block';
   document.getElementById('angles-footer').style.display = 'flex';
   ST.selectedAngle = null;
+  ST.selectedAngles = [];
 
   const TAG_COLORS = {
     conseil: '#3b82f6', storytelling: '#a855f7', annonce: '#10b981',
@@ -1499,47 +1501,52 @@ function renderAngles(angles) {
 }
 
 function selectAngle(id) {
-  ST.selectedAngle = ST.selectedAngle === id ? null : id;
-  document.querySelectorAll('.angle-card').forEach(c => c.classList.remove('selected'));
-  if (ST.selectedAngle) document.getElementById(`angle-${id}`).classList.add('selected');
+  if (!ST.selectedAngles) ST.selectedAngles = [];
+  const idx = ST.selectedAngles.indexOf(id);
+  if (idx > -1) {
+    ST.selectedAngles.splice(idx, 1);
+    document.getElementById(`angle-${id}`).classList.remove('selected');
+  } else {
+    ST.selectedAngles.push(id);
+    document.getElementById(`angle-${id}`).classList.add('selected');
+  }
+  // Keep backward compat
+  ST.selectedAngle = ST.selectedAngles[0] || null;
   updateAngleSelection();
 }
 
 function updateAngleSelection() {
   const label = document.getElementById('sel-count-label');
   const btn = document.getElementById('btn-generate');
-  if (ST.selectedAngle) {
-    label.textContent = '1 sélectionné';
+  const count = ST.selectedAngles ? ST.selectedAngles.length : 0;
+  if (count > 0) {
+    const postCount = Math.max(10, count * 3);
+    label.textContent = `${count} angle${count > 1 ? 's' : ''} → ~${postCount} posts`;
     label.style.color = 'var(--accent)';
     btn.disabled = false;
-    btn.textContent = '✨ Générer le post →';
+    btn.textContent = `✨ Générer ${postCount} posts →`;
   } else {
     label.textContent = '0 sélectionné';
     label.style.color = 'var(--text-dim)';
     btn.disabled = true;
-    btn.textContent = '✨ Générer le post →';
+    btn.textContent = '✨ Générer les posts →';
   }
 }
 
 // ── GENERATION ───────────────────────────────────────────────────────
 async function startGeneration() {
-  if (!ST.selectedAngle) return;
-  const selectedData = ST.proposedAngles.find(a => a.id === ST.selectedAngle);
-  if (!selectedData) return;
+  const angles = (ST.selectedAngles || []).map(id => ST.proposedAngles.find(a => a.id === id)).filter(Boolean);
+  if (angles.length === 0) return;
 
-  document.getElementById('sb-angle').textContent = selectedData.tag;
+  document.getElementById('sb-angle').textContent = angles.map(a => a.tag).join(', ');
   switchStep(2);
 
   const log = document.getElementById('gen-log');
   const status = document.getElementById('gen-status');
-  const steps = ['🎯 Analyse de l\'angle sélectionné…', '📚 Chargement du style du profil…', '✍️ Rédaction du post principal…', '🔄 Création des variantes…', '✨ Humanisation du texte…', '📊 Calcul du score LinkedIn…'];
+  const totalPosts = Math.max(10, angles.length * 3);
 
   log.textContent = '';
-  for (let i = 0; i < steps.length - 1; i++) {
-    log.textContent += `✓ ${steps[i]}\n`;
-    status.textContent = steps[i];
-    await sleep(350);
-  }
+  ST.posts = [];
 
   const p = PROFILES[ST.profile];
   const sourceContent = ST.source === 'brief' ? `BRIEF : ${ST.brief}` : `ARTICLE SOURCE :\n${ST.article.substring(0, 3000)}`;
@@ -1557,7 +1564,18 @@ ${exRef.body}
 Hashtags : ${exRef.hashtags}
 ` : '';
 
-  const prompt = `Tu es un expert LinkedIn qui rédige des posts pour le profil "${p.name}" (${p.role}).
+  // Generate posts in batches per angle
+  const postsPerAngle = Math.ceil(totalPosts / angles.length);
+
+  for (let a = 0; a < angles.length; a++) {
+    const selectedData = angles[a];
+    const batchNum = a + 1;
+    const batchSize = (a === angles.length - 1) ? totalPosts - ST.posts.length : postsPerAngle;
+
+    log.textContent += `\n📌 Angle ${batchNum}/${angles.length} : ${selectedData.tag}\n`;
+    status.textContent = `✍️ Génération angle ${batchNum}/${angles.length} (${selectedData.tag})…`;
+
+    const prompt = `Tu es un expert LinkedIn qui rédige des posts pour le profil "${p.name}" (${p.role}).
 
 PROFIL : ${p.name}
 CONTEXTE : ${p.context}
@@ -1592,46 +1610,57 @@ HUMANISATION :
 - Varier la longueur des phrases
 - Ajouter des respirations (lignes vides)
 
-VARIANTES :
-Génère 1 post principal + 3 variantes.
-Chaque variante doit avoir :
-- Un hook DIFFÉRENT
-- Une structure légèrement différente
-- Le même message de fond
+Génère exactement ${batchSize} posts LinkedIn DIFFÉRENTS pour cet angle.
+Chaque post doit avoir :
+- Un hook UNIQUE et différent des autres
+- Une approche / structure différente
+- Le même angle de fond mais traité différemment
 
 SUGGESTION VISUELLE :
 Pour chaque post, suggère brièvement un type de visuel adapté (photo, carrousel, infographie, etc.)
 
 Réponds UNIQUEMENT en JSON valide sans markdown :
 {"posts":[
-  {"label":"Post principal","hook":"...","body":"... (corps complet du post SANS le hook, le hook sera affiché séparément)","hashtags":"#tag1 #tag2","visual":"Description du visuel suggéré","score":{"hook":8,"structure":7,"engagement":8,"lisibilite":9,"global":8}}
+  {"label":"Post ${ST.posts.length + 1}","hook":"...","body":"... (corps complet du post SANS le hook)","hashtags":"#tag1 #tag2","visual":"Description du visuel suggéré","score":{"hook":8,"structure":7,"engagement":8,"lisibilite":9,"global":8}}
 ]}
 
 IMPORTANT :
 - "hook" = les 2-3 premières lignes SEULEMENT (ce qui apparaît avant "voir plus")
 - "body" = tout le reste du post APRÈS le hook
 - "score" = note de 1 à 10 pour chaque critère
-- Génère exactement 4 posts (1 principal + 3 variantes)
-- Chaque post doit être complet et publiable tel quel`;
+- Génère exactement ${batchSize} posts
+- Numérote les labels : "Post ${ST.posts.length + 1}", "Post ${ST.posts.length + 2}", etc.
+- Chaque post doit être complet et publiable tel quel
+- AUCUN post ne doit se ressembler — hooks, structures et angles tous différents`;
 
-  try {
-    log.textContent += `✓ ${steps[steps.length - 1]}\n`;
-    status.textContent = ST.webSearch ? 'Recherche web + rédaction…' : 'Appel API Claude…';
+    try {
+      const raw = (await callApiJson(prompt, 16000)).trim().replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(raw);
+      const newPosts = parsed.posts || [];
 
-    const raw = (await callApiJson(prompt, 12000)).trim().replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(raw);
-    ST.posts = parsed.posts;
+      // Re-label posts
+      newPosts.forEach((post, i) => {
+        post.label = `Post ${ST.posts.length + i + 1}`;
+        post.angleTag = selectedData.tag;
+      });
 
-    log.textContent += `✅ ${ST.posts.length} variantes générées !\n`;
-    status.textContent = '✅ Terminé !';
+      ST.posts.push(...newPosts);
+      log.textContent += `  ✅ ${newPosts.length} posts générés (total: ${ST.posts.length})\n`;
+
+    } catch (err) {
+      log.textContent += `  ❌ Erreur angle "${selectedData.tag}": ${err.message}\n`;
+      console.error(err);
+    }
+  }
+
+  if (ST.posts.length > 0) {
+    log.textContent += `\n🎉 ${ST.posts.length} posts LinkedIn générés au total !\n`;
+    status.textContent = `✅ ${ST.posts.length} posts générés !`;
     await sleep(400);
     renderPosts();
     advance(3);
-
-  } catch (err) {
-    log.textContent += `❌ Erreur : ${err.message}\n`;
-    status.textContent = 'Erreur';
-    console.error(err);
+  } else {
+    status.textContent = '❌ Aucun post généré';
   }
 }
 
@@ -1640,16 +1669,21 @@ function renderPosts() {
   const p = PROFILES[ST.profile];
   document.getElementById('sum-profile').textContent = p.name;
   document.getElementById('sum-source').textContent = ST.source === 'brief' ? 'Brief' : 'Article';
-  const angle = ST.proposedAngles.find(a => a.id === ST.selectedAngle);
-  document.getElementById('sum-angle').textContent = angle ? angle.tag : '—';
-  document.getElementById('sum-count').textContent = `${ST.posts.length} variantes`;
+  const angleNames = (ST.selectedAngles || []).map(id => {
+    const a = ST.proposedAngles.find(x => x.id === id);
+    return a ? a.tag : '';
+  }).filter(Boolean).join(', ');
+  document.getElementById('sum-angle').textContent = angleNames || '—';
+  document.getElementById('sum-count').textContent = `${ST.posts.length} posts`;
   document.getElementById('sb-post-count').textContent = ST.posts.length;
-  document.getElementById('sb-variants').textContent = `${ST.posts.length} variantes`;
+  document.getElementById('sb-variants').textContent = `${ST.posts.length} posts`;
   document.getElementById('results-sidebar').style.display = 'block';
 
-  // Variant tabs
-  document.getElementById('variant-tabs').innerHTML = ST.posts.map((post, i) =>
-    `<button class="variant-tab${i === 0 ? ' active' : ''}" onclick="showVariant(${i})">${post.label || (i === 0 ? 'Principal' : `Variante ${i}`)}</button>`
+  // Post tabs — scrollable for 10+
+  const tabsEl = document.getElementById('variant-tabs');
+  tabsEl.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;max-height:200px;overflow-y:auto;padding:2px;';
+  tabsEl.innerHTML = ST.posts.map((post, i) =>
+    `<button class="variant-tab${i === 0 ? ' active' : ''}" onclick="showVariant(${i})" title="${post.angleTag || ''}" style="font-size:11px;padding:5px 10px;">${post.label || `Post ${i + 1}`}</button>`
   ).join('');
 
   ST.currentVariant = 0;
@@ -1806,7 +1840,7 @@ function exportCsv() {
 }
 
 function newPost() {
-  ST.brief = ''; ST.article = ''; ST.wpSelectedId = null; ST.selectedAngle = null; ST.proposedAngles = []; ST.posts = []; ST.currentVariant = 0; ST.kb = []; ST.kbMeta = []; ST.webSearch = false;
+  ST.brief = ''; ST.article = ''; ST.wpSelectedId = null; ST.selectedAngle = null; ST.selectedAngles = []; ST.proposedAngles = []; ST.posts = []; ST.currentVariant = 0; ST.kb = []; ST.kbMeta = []; ST.webSearch = false;
   document.getElementById('brief-input').value = '';
   document.getElementById('article-input').value = '';
   document.getElementById('kb-input').value = '';
